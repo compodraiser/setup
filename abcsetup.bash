@@ -40,4 +40,14 @@ sudo mkdir -p /var/www/$domain
 sudo chown -R \$USER:\$USER /var/www/$domain
 sudo systemctl restart nginx
 
+# Stop Apache Service
+sudo systemctl stop apache2
+
+# Disable Apache from Starting on Boot
+sudo systemctl disable apache2
+
+# Uninstall Apache
+sudo apt-get purge -y apache2
+sudo apt-get autoremove -y
+
 echo "Setup Complete. Place your PHP files in /var/www/$domain"
