@@ -9,9 +9,7 @@ read -p "Enter your domain name: " domain
 
 # Install Certbot and Request SSL Certificate
 sudo apt install -y certbot python3-certbot-nginx
-sudo certbot --nginx -d "$domain"
-
-# Configure Nginx for PHP
+# Preemptively create a server block to avoid certbot creating a default one
 sudo tee /etc/nginx/sites-available/$domain <<EOF
 server {
     listen 80;
@@ -38,9 +36,13 @@ EOF
 sudo ln -s /etc/nginx/sites-available/$domain /etc/nginx/sites-enabled/
 sudo mkdir -p /var/www/$domain
 sudo chown -R \$USER:\$USER /var/www/$domain
-sudo rm /etc/nginx/sites-enabled/default
-rm -r /var/www/html
-sudo systemctl restart nginx
+sudo systemctl reload nginx
+
+# Obtain SSL Certificate and Modify Nginx Configuration for HTTPS
+sudo certbot --nginx -d $domain --redirect --non-interactive --agree-tos -m your-email@example.com
+
+# Reload Nginx to apply changes
+sudo systemctl reload nginx
 
 # Stop Apache Service
 sudo systemctl stop apache2
