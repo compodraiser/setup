@@ -38,6 +38,7 @@ EOF
 sudo ln -s /etc/nginx/sites-available/$domain /etc/nginx/sites-enabled/
 sudo mkdir -p /var/www/$domain
 sudo chown -R \$USER:\$USER /var/www/$domain
+sudo rm /etc/nginx/sites-enabled/default
 sudo systemctl restart nginx
 
 # Stop Apache Service
