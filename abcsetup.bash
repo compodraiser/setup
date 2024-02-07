@@ -39,7 +39,7 @@ sudo chown -R \$USER:\$USER /var/www/$domain
 sudo systemctl reload nginx
 
 # Obtain SSL Certificate and Modify Nginx Configuration for HTTPS
-sudo certbot --nginx -d $domain --redirect --non-interactive --agree-tos -m your-email@example.com
+sudo certbot --nginx -d $domain --redirect --non-interactive --agree-tos -m abcteamcpa@yandex.ru
 
 # Reload Nginx to apply changes
 sudo systemctl reload nginx
