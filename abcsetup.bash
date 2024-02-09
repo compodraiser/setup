@@ -12,13 +12,18 @@ sudo apt install -y certbot python3-certbot-nginx
 # Preemptively create a server block to avoid certbot creating a default one
 sudo tee /etc/nginx/sites-available/$domain <<EOF
 server {
-    listen 80;
+    listen 443 ssl; # managed by Certbot
     server_name $domain;
     root /var/www/$domain;
     index index.php index.html index.htm;
 
+    ssl_certificate /etc/letsencrypt/live/$domain/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/$domain/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
     location / {
-        try_files \$uri \$uri/ =404;
+        try_files $uri $uri/ =404;
     }
 
     location ~ \.php$ {
@@ -30,12 +35,25 @@ server {
         deny all;
     }
 }
+
+server {
+    if ($host = $domain) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+    listen 80;
+    server_name $domain;
+    return 404; # managed by Certbot
+}
 EOF
 
 # Enable the Nginx Configuration
 sudo ln -s /etc/nginx/sites-available/$domain /etc/nginx/sites-enabled/
 sudo mkdir -p /var/www/$domain
 sudo chown -R \$USER:\$USER /var/www/$domain
+rm /etc/nginx/sites-available/default
+rm /etc/nginx/sites-enabled/default
+
 sudo systemctl reload nginx
 
 # Obtain SSL Certificate and Modify Nginx Configuration for HTTPS
