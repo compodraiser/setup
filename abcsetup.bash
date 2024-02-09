@@ -55,6 +55,8 @@ sudo chown -R \$USER:\$USER /var/www/$domain
 rm /etc/nginx/sites-available/default
 rm /etc/nginx/sites-enabled/default
 
+echo "<?php phpinfo(); ?>" | sudo tee /var/www/$domain/index.php > /dev/null
+
 sudo systemctl reload nginx
 
 # Obtain SSL Certificate and Modify Nginx Configuration for HTTPS
