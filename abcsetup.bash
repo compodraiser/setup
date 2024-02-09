@@ -23,12 +23,12 @@ server {
     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
 
     location / {
-        try_files $uri $uri/ =404;
+        try_files \$uri \$uri/ =404;
     }
 
     location ~ \.php$ {
         include snippets/fastcgi-php.conf;
-        fastcgi_pass unix:/var/run/php/php$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')-fpm.sock;
+        fastcgi_pass unix:/var/run/php/php\$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')-fpm.sock;
     }
 
     location ~ /\.ht {
@@ -37,8 +37,8 @@ server {
 }
 
 server {
-    if ($host = $domain) {
-        return 301 https://$host$request_uri;
+    if (\$host = $domain) {
+        return 301 https://\$host\$request_uri;
     } # managed by Certbot
 
     listen 80;
