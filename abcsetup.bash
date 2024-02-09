@@ -10,6 +10,7 @@ read -p "Enter your domain name: " domain
 # Install Certbot and Request SSL Certificate
 sudo apt install -y certbot python3-certbot-nginx
 # Preemptively create a server block to avoid certbot creating a default one
+PHP_VERSION=$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')
 sudo tee /etc/nginx/sites-available/$domain <<EOF
 server {
     listen 443 ssl; # managed by Certbot
@@ -28,7 +29,7 @@ server {
 
     location ~ \.php$ {
         include snippets/fastcgi-php.conf;
-        fastcgi_pass unix:/var/run/php/php\$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')-fpm.sock;
+        fastcgi_pass unix:/var/run/php/php${PHP_VERSION}-fpm.sock;
     }
 
     location ~ /\.ht {
