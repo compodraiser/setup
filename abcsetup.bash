@@ -1,75 +1,64 @@
 #!/bin/bash
 
-echo "Updating and installing packages..."
-sudo apt-get update && sudo apt-get install -y curl php nginx php-fpm mc certbot python3-certbot-nginx
+# Update and Install Packages
+echo "Updating packages and installing required software..."
+sudo apt update
+sudo apt install -y curl php nginx php-fpm mc certbot python3-certbot-nginx
 
+# Ask for Domain Name
 read -p "Enter your domain name: " domain
 
-# Check and stop Apache before making changes to avoid port conflicts
-if systemctl is-active --quiet apache2; then
-    echo "Stopping and disabling Apache..."
-    sudo systemctl stop apache2
-    sudo systemctl disable apache2
-    sudo apt-get purge -y apache2
-    sudo apt-get autoremove -y
-fi
+# Install Certbot and Obtain SSL Certificate First
+echo "Installing Certbot and obtaining SSL certificate for $domain..."
+sudo certbot certonly --nginx -d "$domain" --non-interactive --agree-tos -m your-email@example.com --redirect
 
+# After SSL certificate is obtained, configure Nginx
 PHP_VERSION=$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')
-echo "Using PHP version: $PHP_VERSION"
-
-echo "Creating Nginx configuration for $domain..."
-sudo tee /etc/nginx/sites-available/$domain <<'EOF'
+echo "Configuring Nginx for $domain with PHP version $PHP_VERSION..."
+sudo bash -c "cat > /etc/nginx/sites-available/$domain <<'EOF'
 server {
     listen 443 ssl;
-    server_name avarenessy.com;
-    root /var/www/avarenessy.com;
+    server_name $domain;
+    root /var/www/$domain;
     index index.php index.html index.htm;
 
-    ssl_certificate /etc/letsencrypt/live/avarenessy.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/avarenessy.com/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/$domain/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/$domain/privkey.pem;
     include /etc/letsencrypt/options-ssl-nginx.conf;
     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
 
     location / {
-        try_files $uri $uri/ =404;
+        try_files \$uri \$uri/ =404;
     }
 
-    location ~ \.php$ {
+    location ~ \\.php\$ {
         include snippets/fastcgi-php.conf;
-        fastcgi_pass unix:/var/run/php/php8.1-fpm.sock;
+        fastcgi_pass unix:/var/run/php/php${PHP_VERSION}-fpm.sock;
     }
 
-    location ~ /\.ht {
+    location ~ /\\.ht {
         deny all;
     }
 }
 
 server {
-    if ($host = avarenessy.com) {
-        return 301 https://$host$request_uri;
-    }
-
     listen 80;
-    server_name avarenessy.com;
-    return 404;
+    server_name $domain;
+    return 301 https://\$host\$request_uri;
 }
-EOF
+EOF"
 
-echo "Enabling site configuration..."
+# Enable the Nginx Configuration
+echo "Enabling site and reloading Nginx..."
 sudo ln -sfn /etc/nginx/sites-available/$domain /etc/nginx/sites-enabled/
 sudo mkdir -p /var/www/$domain
 sudo chown -R \$USER:\$USER /var/www/$domain
 
-echo "Creating a PHP info file..."
+# Create a PHP info file for testing
 echo "<?php phpinfo(); ?>" | sudo tee /var/www/$domain/index.php > /dev/null
 
-echo "Testing Nginx configuration..."
+# Test Nginx configuration and reload
 sudo nginx -t
-
-echo "Reloading Nginx..."
 sudo systemctl reload nginx
 
-echo "Obtaining SSL certificate..."
-sudo certbot --nginx -d $domain --redirect --non-interactive --agree-tos -m your-email@example.com
-
-echo "Setup Complete. Place your PHP files in /var/www/$domain"
+echo "Setup complete. Place your PHP files in /var/www/$domain"
