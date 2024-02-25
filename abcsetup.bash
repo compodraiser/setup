@@ -10,7 +10,7 @@ read -p "Enter your domain name: " domain
 
 # Install Certbot and Obtain SSL Certificate First
 echo "Installing Certbot and obtaining SSL certificate for $domain..."
-sudo certbot certonly -d "$domain" --non-interactive --agree-tos -m abcteamcpa@yandex.ru --redirect
+sudo certbot certonly "$domain" --non-interactive --agree-tos -m abcteamcpa@yandex.ru --redirect
 
 # After SSL certificate is obtained, configure Nginx
 PHP_VERSION=$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')
