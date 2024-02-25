@@ -43,9 +43,8 @@ sudo nginx -t && sudo systemctl reload nginx
 echo "Obtaining SSL certificate for $domain..."
 sudo certbot --nginx -d "$domain" --non-interactive --agree-tos -m your-email@example.com --redirect
 
-# The --nginx flag automatically modifies the Nginx configuration for SSL, 
-# so a separate update to the Nginx config might not be necessary.
-# However, if you need to make further customizations, you could do so here.
+echo "Adjusting Nginx configuration for $domain..."
+sudo sed -i 's|try_files  / =404;|try_files $uri $uri/ =404;|' /etc/nginx/sites-available/$domain
 
 # Reload Nginx to apply SSL configuration
 sudo nginx -t && sudo systemctl reload nginx
