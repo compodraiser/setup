@@ -24,7 +24,7 @@ server {
     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
 
     location / {
-        try_files \$uri \$uri/ =404;
+        try_files $uri $uri/ =404;
     }
 
     location ~ \.php\$ {
@@ -39,7 +39,7 @@ server {
 
 server {
     if (\$host = $domain) {
-        return 301 https://\$host\$request_uri;
+        return 301 https://$host$request_uri;
     } # managed by Certbot
 
     listen 80;
