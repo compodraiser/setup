@@ -18,25 +18,25 @@ PHP_VERSION=$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')
 echo "Using PHP version: $PHP_VERSION"
 
 echo "Creating Nginx configuration for $domain..."
-cat <<EOF | sudo tee /etc/nginx/sites-available/$domain
+sudo tee /etc/nginx/sites-available/$domain <<'EOF'
 server {
     listen 443 ssl;
-    server_name $domain;
-    root /var/www/$domain;
+    server_name avarenessy.com;
+    root /var/www/avarenessy.com;
     index index.php index.html index.htm;
 
-    ssl_certificate /etc/letsencrypt/live/$domain/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/$domain/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/avarenessy.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/avarenessy.com/privkey.pem;
     include /etc/letsencrypt/options-ssl-nginx.conf;
     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
 
     location / {
-        try_files \$uri \$uri/ =404;
+        try_files $uri $uri/ =404;
     }
 
-    location ~ \.php\$ {
+    location ~ \.php$ {
         include snippets/fastcgi-php.conf;
-        fastcgi_pass unix:/var/run/php/php${PHP_VERSION}-fpm.sock;
+        fastcgi_pass unix:/var/run/php/php8.1-fpm.sock;
     }
 
     location ~ /\.ht {
@@ -45,12 +45,12 @@ server {
 }
 
 server {
-    if (\$host = $domain) {
-        return 301 https://\$host\$request_uri;
+    if ($host = avarenessy.com) {
+        return 301 https://$host$request_uri;
     }
 
     listen 80;
-    server_name $domain;
+    server_name avarenessy.com;
     return 404;
 }
 EOF
