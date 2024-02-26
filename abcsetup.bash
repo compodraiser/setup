@@ -41,7 +41,7 @@ sudo nginx -t && sudo systemctl reload nginx
 
 # Obtain SSL Certificate
 echo "Obtaining SSL certificate for $domain..."
-sudo certbot --nginx -d "$domain" --non-interactive --agree-tos -m your-email@example.com --redirect
+sudo certbot --nginx -d "$domain" --non-interactive --agree-tos -m abcteamcpa@yandex.ru --redirect
 
 echo "Adjusting Nginx configuration for $domain..."
 sudo sed -i 's|try_files  / =404;|try_files $uri $uri/ =404;|' /etc/nginx/sites-available/$domain
