@@ -46,6 +46,10 @@ sudo certbot --nginx -d "$domain" --non-interactive --agree-tos -m abcteamcpa@ya
 echo "Adjusting Nginx configuration for $domain..."
 sudo sed -i 's|try_files  / =404;|try_files $uri $uri/ =404;|' /etc/nginx/sites-available/$domain
 
+systemctl stop apache2
+apt remove apache2
+apt purge apache2
+
 # Reload Nginx to apply SSL configuration
 sudo nginx -t && sudo systemctl reload nginx
 
